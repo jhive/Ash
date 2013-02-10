@@ -1,13 +1,18 @@
 package ash.core
 {
 	import asunit.framework.IAsync;
+
 	import org.hamcrest.assertThat;
+	import org.hamcrest.collection.array;
 	import org.hamcrest.collection.hasItems;
+	import org.hamcrest.core.not;
 	import org.hamcrest.object.equalTo;
 	import org.hamcrest.object.isFalse;
 	import org.hamcrest.object.isTrue;
 	import org.hamcrest.object.nullValue;
 	import org.hamcrest.object.sameInstance;
+
+	import flash.geom.Point;
 
 
 
@@ -204,6 +209,29 @@ package ash.core
 			var clone : Entity = entity.clone();
 			assertThat( clone.get( MockComponent ).value, equalTo( 5 ) );
 		}
+
+		[Test]
+		public function cloneChildComponentWithCloneMethodUsesThatMethod() : void
+		{
+			var component : MockClonableComponent = new MockClonableComponent();
+			component.array = [ 1, 2 ];
+			entity.add( component );
+			var clone : Entity = entity.clone();
+			assertThat( clone.get( MockClonableComponent ).array, not( sameInstance( component.array ) ) );
+			assertThat( clone.get( MockClonableComponent ).array, array( 1, 2 ) );
+		}
+
+		[Test]
+		public function cloneChildComponentWithCloneablePropertyClonesThatProperty() : void
+		{
+			var component : MockComponentWithClonableProperty = new MockComponentWithClonableProperty();
+			component.point = new Point( 1, 2 );
+			entity.add( component );
+			var clone : Entity = entity.clone();
+			assertThat( clone.get( MockComponentWithClonableProperty ).point, not( sameInstance( component.point ) ) );
+			assertThat( clone.get( MockComponentWithClonableProperty ).point.x, equalTo( 1 ) );
+			assertThat( clone.get( MockComponentWithClonableProperty ).point.y, equalTo( 2 ) );
+		}
 		
 		private function testSignalContent( signalEntity : Entity, componentClass : Class ) : void
 		{
@@ -213,6 +241,7 @@ package ash.core
 	}
 }
 
+import flash.geom.Point;
 class MockComponent
 {
 	public var value : int;
@@ -226,4 +255,25 @@ class MockComponent2
 class MockComponentExtended extends MockComponent
 {
 	public var other : int;
+}
+
+class MockClonableComponent
+{
+	public var array : Array;
+	
+	public function clone() : MockClonableComponent
+	{
+		var other : MockClonableComponent = new MockClonableComponent();
+		other.array = new Array();
+		for each( var value : * in array )
+		{
+			other.array.push( value );
+		}
+		return other;
+	}
+}
+
+class MockComponentWithClonableProperty
+{
+	public var point : Point;
 }

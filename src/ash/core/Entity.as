@@ -144,15 +144,29 @@ package ash.core
 			var copy : Entity = new Entity();
 			for ( var classRef : * in components )
 			{
-                var component : Object   = components[classRef]
-				var names : XMLList = describeType( component ).variable.@name;
-				var componentClass : Class = component.constructor as Class;
-				var newComponent : * = new componentClass();
-				for each( var key : String in names )
+                var component : * = components[classRef];
+				if( component.hasOwnProperty( "clone" ) && component.clone is Function )
 				{
-					newComponent[key] = component[key];
+					copy.add( component.clone(), classRef );
 				}
-				copy.add( newComponent , classRef);
+				else
+				{
+					var names : XMLList = describeType( component ).variable.@name;
+					var componentClass : Class = component.constructor as Class;
+					var newComponent : Object = new componentClass();
+					for each( var key : String in names )
+					{
+						if( component[key] && component[key].hasOwnProperty( "clone" ) && component[key].clone is Function )
+						{
+							newComponent[key] = component[key].clone();
+						}
+						else
+						{
+							newComponent[key] = component[key];
+						}
+					}
+					copy.add( newComponent , classRef);
+				}
 			}
 			return copy;
 		}
