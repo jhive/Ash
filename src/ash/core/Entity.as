@@ -134,7 +134,12 @@ package ash.core
 		}
 		
 		/**
-		 * Make a copy of the entity
+		 * Make a copy of the entity. This method will create noew copies of each component of the entity and add
+		 * them to the new entity. When copying the component, if the component has a clone() method, then that
+		 * will be used, otherwise a new instance of the component type will be created and each property will
+		 * be copied from the current component to the new one. When copying these properties, if the property
+		 * being copied has a clone() method, that will be used otherwise a simple assignment, or shallow copy,
+		 * will be performed.
 		 * 
 		 * @return A new entity with new components that are copies of the components on the
 		 * original entity.
